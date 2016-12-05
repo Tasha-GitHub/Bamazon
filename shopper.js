@@ -1,3 +1,7 @@
+//----------------------------------------------------------//
+//              required variables                          //
+//----------------------------------------------------------//
+
 var inquirer = require("inquirer");
 var mysql = require("mysql");
 var Table = require('cli-table');
@@ -6,6 +10,9 @@ var amount;
 var currentInventory = [];
 
 
+//----------------------------------------------------------//
+//             propmt user function                         //
+//----------------------------------------------------------//
 
 
 // prompts user for input 
@@ -41,8 +48,6 @@ function promptUser(){
 		//assigns users choices to variables
 		itemSKU = answers.choice;
 		amount = answers.quanity;
-		//console.log(itemSKU);
-		//console.log(amount);
 		if(currentInventory.indexOf(parseInt(itemSKU)) === -1){
 			console.log("hmmm, we dont seem to have a type of product, please enter a correct SKU number");
 			printDB();
@@ -55,11 +60,9 @@ function promptUser(){
 				};
 				var stock = res[0].quanity;
 				var itemName = res[0].name;
-				var charges = amount * parseFloat(res[0].price)
-				//console.log(charges)
+				var charges = amount * parseFloat(res[0].price);
 				var newStock = parseInt(res[0].quanity) - amount;
-				//console.log(newStock)
-				//console.log(stock)
+
 
 				if(stock >= amount) {
 					if(answers.confirm){
@@ -70,34 +73,24 @@ function promptUser(){
 						}, {
 						  SKU: itemSKU
 						}], function(err, res) {
-							console.log("successfully updated")
+							
 						});
-						// looks in db and lets user know what they purchased
-						//connection.query("SELECT * FROM inventory WHERE ?", {SKU : itemSKU},function(err, res) {
-						//if (err) throw err;
 						
 						console.log("You have purchased " + amount +" units of " + itemName)
-						console.log("You have been charged: " + charges);
+						console.log("You have been charged: " + charges + " dollars");
 						console.log("thank you for your purchases");
-						//})
 						
 						dissconnectDB();
 					} else {
-						console.log("repeat again")
 						connection.query("UPDATE inventory SET ? WHERE ?", [{
 						  quanity: newStock
 						}, {
 						  SKU: itemSKU
 						}], function(err, res) {
-							console.log("successfully updated")
+							
 						});
-						// looks in db and lets user know what they purchased
-						//connection.query("SELECT * FROM inventory WHERE ?", {SKU : itemSKU},function(err, res) {
-						//if (err) throw err;
-						//var itemName = res[0].name;
 						console.log("You have purchased " + amount +" units of " + itemName);
-						console.log("You have been charged: " + charges);
-						//});
+						console.log("You have been charged: " + charges + " dollars");
 						printDB();
 					}
 				} else{
@@ -109,11 +102,11 @@ function promptUser(){
 	});
 }
 
+//----------------------------------------------------------//
+//              connect to database                         //
+//----------------------------------------------------------//
 
 //connect to database
-
-
-
 	var connection = mysql.createConnection({
   		host: "localhost",
   		port: 3306,
@@ -128,16 +121,24 @@ function promptUser(){
 
 	connection.connect(function(err) {
 	  	if (err) throw err;
+	  	//prints table and starts up app
+	  	console.log("Welcome to the Shopper Portal");
 	  	printDB();
-	  	//console.log("connected as id " + connection.threadId);
 	});
 
+//----------------------------------------------------------//
+//              stop database function                      //
+//----------------------------------------------------------//
 
 
 //stop DB connection
 function dissconnectDB(){
 	connection.end();
 }
+
+//----------------------------------------------------------//
+//               print table  function                      //
+//----------------------------------------------------------//
 
 // print DB
 function printDB(){
@@ -157,16 +158,14 @@ function printDB(){
 		);
 		 
 		currentInventory = [];
-		//console.log(res);
 		for (var i = 0; i < res.length; i++) {
 		    table.push([res[i].SKU , res[i].name , res[i].department , res[i].price, res[i].quanity]);
 		    currentInventory.push(res[i].SKU);
 		}
-	  //console.log("-----------------------------------");
+	  
 		
 
 	  console.log(table.toString());
-	  //console.log(currentInventory);
 	  promptUser();
 
 	});
