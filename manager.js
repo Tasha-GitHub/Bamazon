@@ -27,7 +27,7 @@ function promptUser(){
 
 		switch(answers.userChoice) {
 	    case "Add Inventory":
-	        printDB();
+	        printDB(addInventory);
 	        break;
 	    case "Remove Item":
 	   		printDB();
@@ -208,9 +208,65 @@ function replenishStock(){
 	});
 }
 
+//----------------------------------------------------------//
+//                add inventory function                    //
+//----------------------------------------------------------//
 
 
+function addInventory(){
 
+
+inquirer.prompt([
+		{
+		message: "what is the name of the item you would like to add?",
+		name: "brand",
+		validate: function(value) {
+            if (isNaN(value) === true && value.length > 0) {
+                return true;
+            }
+                return false;
+        }
+
+	} , {
+		message: "How much would you like to stock?",
+		name: "quanity",
+		validate: function(value) {
+            if (isNaN(value) === false && value.length > 0) {
+                return true;
+            }
+                return false;
+        }
+	} , {
+		message: "How much does this item cost?",
+		name: "quanity",
+		validate: function(value) {
+            if (isNaN(value) === false && value.length > 0) {
+                return true;
+            }
+                return false;
+        }
+	} , {
+		message: "What is this products category?",
+		name: "quanity",
+		validate: function(value) {
+            if (isNaN(value) === false && value.length > 0) {
+                return true;
+            }
+                return false;
+        }
+	} , {
+		type: "confirm",
+	    message: "Are you done stocking?",
+	    name: "confirm",
+	    default: false
+	}
+
+	]).then(function (answers) {
+
+	});
+
+
+}
 
 
 
