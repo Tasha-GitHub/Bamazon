@@ -33,7 +33,7 @@ function promptUser(){
 	   		printDB();
 	       	
 	        break;
-	    case "Replenish Stock":
+	    case "Replenish Stock"://done
 	    	printDB(replenishStock);
 	        
 	        break;
@@ -137,19 +137,80 @@ function printDB(funct){
 
 function replenishStock(){
 	inquirer.prompt([
-		{	message: "please enter the id of the product you would like to re-stock",
-			name: "id",
-			validate: function(value) {
+		{
+		message: "what is the SKU of the item you would like to restock?",
+		name: "choice",
+		validate: function(value) {
             if (isNaN(value) === false && value.length > 0) {
                 return true;
             }
                 return false;
         }
-		}
+
+	} , {
+		message: "How much would you like to stock?",
+		name: "quanity",
+		validate: function(value) {
+            if (isNaN(value) === false && value.length > 0) {
+                return true;
+            }
+                return false;
+        }
+	} , {
+		type: "confirm",
+	    message: "Are you done stocking?",
+	    name: "confirm",
+	    default: false
+	}
 
 	]).then(function (answers) {
-		console.log(answers.userChoice);
+		itemSKU = answers.choice;
+		amount = answers.quanity;
+		if(currentInventory.indexOf(parseInt(itemSKU)) === -1){
+			console.log("hmmm, we dont seem to have a type of product, please enter a correct SKU number");
+			printDB(replenishStock);
+		}else{
+			currentInventory = [];
+			//checks current inventory
+			connection.query("SELECT * FROM inventory WHERE ?", {SKU : itemSKU},function(err, res) {
+				if (err) {
+					console.log("that item does not appear in our systems, please try again");
+				};
+			var stock = res[0].quanity;
+			var itemName = res[0].name;
+			//var charges = amount * parseFloat(res[0].price);
+			var newStock = parseInt(stock) + parseInt(answers.quanity);
+
+			if(answers.confirm){
+				
+
+				connection.query("UPDATE inventory SET ? WHERE ?", [{
+					quanity: newStock
+				}, {
+					SKU: itemSKU
+				}], function(err, res) {});
+						
+				console.log("You have stocked " + amount +" units of " + itemName);
+				console.log("You have been logged out of the manager portal here is a summary of your current stock.");
+				printDB();				
+				dissconnectDB();
+			} else {
+				connection.query("UPDATE inventory SET ? WHERE ?", [{
+					quanity: newStock
+				}, {
+					SKU: itemSKU
+				}], function(err, res) {});
+				console.log("You have stocked " + amount +" units of " + itemName);
+				printDB(replenishStock);
+				}
+			});
+		}
+	});
 }
+
+
+
+
 
 
 
